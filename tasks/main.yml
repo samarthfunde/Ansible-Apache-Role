@@ -1,0 +1,19 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for httpd-role
+
+- name: Install apache2 
+  apt: name="{{ pkg }}" state=present
+
+- name: Start apache2
+  service: name="{{ svc }}" state=started
+
+- name: create file
+  file: path="{{ file_path }}" state=touch
+
+- name: copy content to file 
+  copy:
+    dest: "{{ file_path }}"
+    content: |
+            <h1> Welcome to roles demo in ansible </h1>
+  notify: Restart apache 
