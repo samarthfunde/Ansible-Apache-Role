@@ -1,0 +1,90 @@
+---
+- name: This is playbook file is to install LEMP on remote host using varibles
+  hosts: myhost
+  become: true
+  vars:
+     web_pkg: nginx
+     app_pkg: php
+     db_pkg: mariadb105-server
+     web_service: nginx
+     app_service: php-fpm
+     db_service: mariadb
+     my_port: 90
+     my_path: /usr/share/nginx/html/myweb
+  tasks:
+    - name: update apt
+      dnf:
+       name: "*"
+       state: latest
+ 
+    - name: install web_pkg
+      dnf:
+       name: "{{ web_pkg }}"
+       state: present
+ 
+    - name: start web_pkg
+      ansible.builtin.systemd_service:
+       name: "{{ web_service }}"
+       state: started
+       enabled: true
+ 
+    - name: install app_pkg
+      dnf:
+       name: "{{ app_pkg }}"
+       state: present
+ 
+    - name: start app_service
+      systemd_service:
+       name: "{{ app_service }}"
+       state: started
+       enabled: true
+ 
+    - name: install db-pkg
+      dnf:
+       name: "{{ db_pkg }}"
+       state: present
+ 
+    - name: install db_service
+      service:
+       name: "{{ db_service }}"
+       state: started
+       enabled: true
+      notify: Restart nginx
+      notify: Restart mariadb
+      notify: Restart php
+    - name: create directory
+      file:
+        path: /usr/share/nginx/html/myweb
+        state: directory
+ 
+    - name: copy file
+      copy:
+       src: ./index.html
+       dest: /usr/share/nginx/html/myweb
+ 
+    - name: change configuration
+      template:
+       src: ./myconfig
+       dest: /etc/nginx/nginx.conf
+      notify: Reload nginx
+ 
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+ 
+    - name: Restart mariadb
+      service:
+        name: mariadb
+        state: restarted
+ 
+    - name: Restart php
+      service:
+        name: php-fpm
+        state: restarted

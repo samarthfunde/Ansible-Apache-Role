@@ -1,0 +1,16 @@
+- name: This is my first playbook files
+  hosts: localhost
+  become: true
+  connection: local
+  tasks:
+     - name: install nginx
+       apt:
+         name: nginx
+         state: present
+
+     - name: start nginx
+       service:
+         name: nginx
+         state: started
+
+

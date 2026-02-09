@@ -1,0 +1,35 @@
+- name: LAMP demo on remote server
+  hosts: all
+  become: true
+
+  vars:
+    install_pkg:
+      - apache2
+      - mariadb-server
+      - php
+      - php-fpm
+
+    start_pkg:
+      - apache2
+      - mariadb
+      - php8.3-fpm
+
+  tasks:
+
+    - name: Install LAMP packages
+      apt:
+        name: "{{ install_pkg }}"
+        state: present
+        update_cache: yes
+
+    - name: Start services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop: "{{ start_pkg }}"
+
+    - name: Copy index file
+      copy:
+        src: /home/ubuntu/ansifiles/project_3/index.html
+        dest: /var/www/html/index.html

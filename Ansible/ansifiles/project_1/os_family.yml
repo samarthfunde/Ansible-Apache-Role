@@ -1,0 +1,48 @@
+---
+- name: LAMP demo on remote servers (Ubuntu + Amazon Linux)
+  hosts: all
+  become: true
+
+  tasks:
+    # ---------- AMAZON LINUX ----------
+    - name: Install LAMP on Amazon Linux
+      ansible.builtin.dnf:
+        name:
+          - httpd
+          - mariadb105-server
+          - php
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: Start services on Amazon Linux
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+#        enabled: yes
+      loop:
+        - httpd
+        - mariadb
+        - php-fpm
+      when: ansible_facts['os_family'] == "RedHat"
+
+    # ---------- UBUNTU ----------
+
+    - name: Install LAMP on Ubuntu
+      ansible.builtin.apt:
+        name:
+          - apache2
+          - mariadb-server
+          - php
+          - php8.3-fpm
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Start services on Ubuntu
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+      loop:
+        - apache2
+        - mariadb
+        - php8.3-fpm
+      when: ansible_facts['os_family'] == "Debian"

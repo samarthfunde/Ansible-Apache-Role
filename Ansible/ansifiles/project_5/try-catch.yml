@@ -1,0 +1,24 @@
+---
+- name: try-catch demo
+  hosts: localhost
+  become: true
+  connection: local
+
+  tasks:
+    - block:
+        - name: Install apache on Debian/Ubuntu
+          shell: apt install apache2 -y
+
+        - debug:
+            msg: "Block Executed Successfully"
+
+      rescue:
+        - name: Install httpd on RedHat/CentOS
+          shell: dnf install httpd -y
+
+        - debug:
+            msg: "Rescue code Executed"
+
+      always:
+        - debug:
+            msg: "This is from always"

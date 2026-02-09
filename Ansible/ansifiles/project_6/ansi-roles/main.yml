@@ -1,0 +1,6 @@
+- name: This is for demonstrate use of ansible-galaxy roles
+  hosts: localhost
+  become: true
+  connection: local
+  roles:
+   - apache-role

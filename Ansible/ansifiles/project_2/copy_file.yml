@@ -1,0 +1,30 @@
+- name: LAMP demo on remote server
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install LAMP packages
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - apache2
+        - mariadb-server
+        - php
+        - php-fpm
+
+    - name: Start services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - apache2
+        - mariadb
+        - php8.3-fpm
+    
+    - name: Testing copy of the local remote file
+      copy:
+        src: /home/ubuntu/ansifiles/project_2/index.html
+        dest: /var/www/html/

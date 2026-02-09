@@ -1,0 +1,24 @@
+---
+- name: With_items demo
+  hosts: localhost
+  become: true
+  connection: local
+  tasks:
+   - name: Install LEMP
+     ansible.builtin.apt:
+       name: "{{ item }}"
+       state: present
+     with_items:
+       - nginx
+       - mariadb-server
+       - php
+       - php8.3-fpm
+ 
+   - name: Start services
+     ansible.builtin.systemd_service:
+       name: "{{ item }}"
+       state: started
+     with_items:
+       - nginx
+       - mariadb
+       - php8.3-fpm

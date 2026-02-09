@@ -1,0 +1,60 @@
+---
+- name: Setup MariaDB and restore DB
+  hosts: myhost
+  become: yes
+
+  vars_files:
+    - secret.yml
+
+  tasks:
+    - name: Update yum
+      dnf:
+        name: '*'
+        state: latest
+
+    - name: Install pip
+      dnf:
+        name: python3-pip
+        state: present
+
+    - name: Install PyMySQL
+      pip:
+        name: PyMySQL
+
+    - name: Install mariadb
+      dnf:
+        name: mariadb105-server
+        state: present
+
+    - name: Start mariadb
+      service:
+        name: mariadb
+        state: started
+
+    - name: Create mysql user
+      mysql_user:
+        name: "{{ username }}"
+        password: "{{ password }}"
+        login_unix_socket: /var/lib/mysql/mysql.sock
+        check_implicit_admin: yes
+        state: present
+
+    - name: Create database
+      mysql_db:
+        name: testdb
+        state: present
+        login_user: root
+        login_password: "{{ password }}"
+
+    - name: Copy dump file
+      copy:
+        src: dump.sql
+        dest: /tmp/dump.sql
+
+    - name: Import database
+      mysql_db:
+        name: testdb
+        state: import
+        target: /tmp/dump.sql
+        login_user: root
+        login_password: "{{ password }}"
